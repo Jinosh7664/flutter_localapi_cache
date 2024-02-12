@@ -1,3 +1,4 @@
+import "dart:convert";
 import "dart:io";
 
 import "package:flutter/material.dart";
@@ -27,8 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Response? response;
   String contentString = "";
-  final String uri =
-      "https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ben-muhiuddinkhan.json";
+  final String uri = "https://api.urbandictionary.com/v0/define?term=Love";
 
   Future<String> get _localPath async {
     final Directory directory = await getApplicationSupportDirectory();
@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final String path = "${await _localPath}quran.json";
+                  final String path = "${await _localPath}love.json";
 
                   await File(path).writeAsString(response!.body);
                   debugPrint("Stored");
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final String path = "${await _localPath}quran.json";
+                  final String path = "${await _localPath}love.json";
                   final String data = await File(path).readAsString();
                   setState(() {
                     contentString = data;
@@ -86,7 +86,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Text("View Content"),
               ),
               Text(
-                contentString.length.toString(),
+                jsonDecode(contentString).toString(),
+                style: Theme.of(context).primaryTextTheme.bodyMedium!.copyWith(
+                      color: Colors.black,
+                    ),
               ),
             ],
           ),
