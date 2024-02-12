@@ -86,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Text("View Content"),
               ),
               Text(
-                jsonDecode(contentString).toString(),
+                contentString.isNotEmpty
+                    ? jsonDecode(contentString).toString()
+                    : contentString,
                 style: Theme.of(context).primaryTextTheme.bodyMedium!.copyWith(
                       color: Colors.black,
                     ),
