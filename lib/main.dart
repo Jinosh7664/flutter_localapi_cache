@@ -1,9 +1,11 @@
+import "dart:async";
 import "dart:convert";
 import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
+import "package:shared_preferences/shared_preferences.dart";
 
 void main() {
   runApp(const MainApp());
@@ -28,12 +30,57 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Response? response;
   String contentString = "";
+  final String file = "love.json";
   final String uri = "https://api.urbandictionary.com/v0/define?term=Love";
+  List<String> existingFiles = <String>[];
+  final String fileListKey = "existingFiles";
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(checkLocal());
+  }
+
+  Future<void> checkLocal() async {
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    existingFiles = preferences.getStringList(fileListKey) ?? <String>[];
+    setState(() {});
+  }
 
   Future<String> get _localPath async {
-    final Directory directory = await getApplicationSupportDirectory();
-
+    final Directory directory = await getApplicationDocumentsDirectory();
     return directory.path;
+  }
+
+  Future<void> readLocal() async {
+    final SharedPreferences preferences = await SharedPreferences.getInstance();
+    existingFiles = preferences.getStringList(fileListKey) ?? <String>[];
+    if (existingFiles.contains(file)) {
+      final String path = "${await _localPath}$file";
+      final String data = await File(path).readAsString();
+      setState(() {
+        contentString = data;
+      });
+    }
+
+    debugPrint("Read");
+  }
+
+  Future<void> writeData() async {
+    if (response != null) {
+      final SharedPreferences preferences =
+          await SharedPreferences.getInstance();
+      existingFiles = preferences.getStringList(fileListKey) ?? <String>[];
+      final String path = "${await _localPath}$file";
+      await File(path).writeAsString(response!.body);
+      existingFiles.add(file);
+      await preferences.setStringList(
+        fileListKey,
+        existingFiles,
+      );
+    }
+
+    debugPrint("Stored");
   }
 
   @override
@@ -48,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             children: <Widget>[
+              Text("Existin Files are $existingFiles"),
               Center(
                 child: ElevatedButton(
                   onPressed: () async {
@@ -67,21 +115,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final String path = "${await _localPath}love.json";
-
-                  await File(path).writeAsString(response!.body);
-                  debugPrint("Stored");
+                  await writeData();
                 },
                 child: const Text("Store"),
               ),
               ElevatedButton(
                 onPressed: () async {
-                  final String path = "${await _localPath}love.json";
-                  final String data = await File(path).readAsString();
-                  setState(() {
-                    contentString = data;
-                  });
-                  debugPrint("Read");
+                  await readLocal();
                 },
                 child: const Text("View Content"),
               ),
