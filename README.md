@@ -1,7 +1,5 @@
 # flutter_localapi_cache
 
-A new Flutter project.
-
 ## Getting Started
 
 A simple example in Flutter for Fetching API and storing it locally as File and utilising it.
