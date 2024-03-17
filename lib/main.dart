@@ -30,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   Response? response;
   String contentString = "";
-  final String file = "love.json";
+  final String file = "love";
   final String uri = "https://api.urbandictionary.com/v0/define?term=Love";
   List<String> existingFiles = <String>[];
   final String fileListKey = "existingFiles";
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     existingFiles = preferences.getStringList(fileListKey) ?? <String>[];
     if (existingFiles.contains(file)) {
-      final String path = "${await _localPath}$file";
+      final String path = "${await _localPath}$file.json";
       final String data = await File(path).readAsString();
       setState(() {
         contentString = data;
@@ -71,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final SharedPreferences preferences =
           await SharedPreferences.getInstance();
       existingFiles = preferences.getStringList(fileListKey) ?? <String>[];
-      final String path = "${await _localPath}$file";
+      final String path = "${await _localPath}$file.json";
       await File(path).writeAsString(response!.body);
       existingFiles.add(file);
       await preferences.setStringList(
